@@ -27,7 +27,7 @@ async function run() {
     await client.connect();
 
     const serviceCollection=client.db('SwiftFixDB').collection('services');
-    const applicationCollection=client.db('SwiftFixDB').collection('applications');
+    const bookingCollection=client.db('SwiftFixDB').collection('booking');
 
       app.get('/services',async(req,res)=>{
        const result = await serviceCollection.find().toArray();
@@ -42,14 +42,14 @@ async function run() {
         res.send(result);
     })
 
-      app.get('/applications', async (req, res) => {
-          const result = await applicationCollection.find().toArray();
+      app.get('/booking', async (req, res) => {
+          const result = await bookingCollection.find().toArray();
           res.send(result);
       });
 
-      app.post('/applications',async(req,res)=>{
-        const application=req.body;
-        const result=await applicationCollection.insertOne(application);
+      app.post('/booking',async(req,res)=>{
+        const booking=req.body;
+        const result=await bookingCollection.insertOne(booking);
         res.send(result);
     })
     // Send a ping to confirm a successful connection
