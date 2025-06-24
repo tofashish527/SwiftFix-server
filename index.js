@@ -43,7 +43,21 @@ async function run() {
     })
 
       app.get('/booking', async (req, res) => {
+        const email=req.query.email;
+          const query={
+        applicant:email
+      }
           const result = await bookingCollection.find().toArray();
+           //bad way to aggregate data
+      for(const svc of result)
+      {
+        const svcId=svc.serviceId;
+        const svcQuery={_id:new ObjectId(svcId)}
+        const service=await serviceCollection.findOne(svcQuery);
+        svc.serviceName=service.serviceName;
+        svc.providerName=service.providerName;
+        svc.price=service.servicePrice;
+      }
           res.send(result);
       });
 
