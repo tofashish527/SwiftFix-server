@@ -30,7 +30,13 @@ async function run() {
     const bookingCollection=client.db('SwiftFixDB').collection('booking');
 
       app.get('/services',async(req,res)=>{
-       const result = await serviceCollection.find().toArray();
+             const email=req.query.email;
+        const query={}
+        if(email)
+        {
+          query.ProviderEmail=email;
+        }
+       const result = await serviceCollection.find(query).toArray();
         res.send(result); 
     })
 
@@ -41,6 +47,26 @@ async function run() {
         const result = await serviceCollection.findOne(query);
         res.send(result);
     })
+
+     app.post('/services',async(req,res)=>{
+        const newJob=req.body;
+        console.log(newJob);
+        const result=await serviceCollection.insertOne(newJob);
+        res.send(result)
+    })
+
+    app.put('/services/:id', async (req, res) => {
+  const id = req.params.id;
+  const updatedService = req.body;
+
+  const result = await serviceCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: updatedService }
+  );
+
+  res.send(result);
+});
+
 
       app.get('/booking', async (req, res) => {
         const email=req.query.email;
@@ -61,11 +87,25 @@ async function run() {
           res.send(result);
       });
 
+    //      app.get('/booking/service/:job_id',async(req,res)=>{
+    //   const job_id=req.params.job_id;
+    //   const query={jobId:job_id}
+    //   const result=await bookingCollection.find(query).toArray()
+    //   res.send(result)
+    // })
+
       app.post('/booking',async(req,res)=>{
         const booking=req.body;
         const result=await bookingCollection.insertOne(booking);
         res.send(result);
     })
+
+    app.delete('/services/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await serviceCollection.deleteOne(query);
+  res.send(result);
+});
 
     app.delete('/booking/:id', async (req, res) => {
   const id = req.params.id;
