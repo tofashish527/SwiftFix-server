@@ -34,7 +34,7 @@ async function run() {
         const query={}
         if(email)
         {
-          query.ProviderEmail=email;
+          query.providerEmail=email;
         }
        const result = await serviceCollection.find(query).toArray();
         res.send(result); 
@@ -47,6 +47,24 @@ async function run() {
         const result = await serviceCollection.findOne(query);
         res.send(result);
     })
+
+
+    app.get('/booking/provider', async (req, res) => {
+  const email = req.query.email;
+  if (!email) {
+    return res.status(400).send({ error: 'Email is required' });
+  }
+
+  const services = await serviceCollection.find({ providerEmail: email }).toArray();
+  const serviceIds = services.map(svc => svc._id.toString());
+
+  const bookings = await bookingCollection
+    .find({ serviceId: { $in: serviceIds } })
+    .toArray();
+
+  res.send(bookings);
+});
+
 
      app.post('/services',async(req,res)=>{
         const newJob=req.body;
@@ -71,9 +89,9 @@ async function run() {
       app.get('/booking', async (req, res) => {
         const email=req.query.email;
           const query={
-        applicant:email
+        userEmail:email
       }
-          const result = await bookingCollection.find().toArray();
+          const result = await bookingCollection.find(query).toArray();
            //bad way to aggregate data
       for(const svc of result)
       {
@@ -94,10 +112,41 @@ async function run() {
     //   res.send(result)
     // })
 
+    //   app.get('/booking/services/:id',async(req,res)=>{
+    //   const id=req.params.id;
+    //   const query={serviceId:id}
+    //   const result=await bookingCollection.find(query).toArray()
+    //   res.send(result)
+    // })
+
       app.post('/booking',async(req,res)=>{
         const booking=req.body;
         const result=await bookingCollection.insertOne(booking);
         res.send(result);
+    })
+
+//     app.patch('/booking/:id', async (req, res) => {
+//   const id = req.params.id;
+//   const { serviceStatus } = req.body;
+
+//   const result = await bookingCollection.updateOne(
+//     { _id: new ObjectId(id) },
+//     { $set: { serviceStatus } }
+//   );
+
+//   res.send(result);
+// });
+
+ app.patch('/booking/:id',async(req,res)=>{
+      const id=req.params.id;
+      const filter={_id:new ObjectId(id)}
+      const updatedDoc={
+        $set:{
+          serviceStatus:req.body.status
+        }
+      }
+      const result=await bookingCollection.updateOne(filter,updatedDoc)
+      res.send(result)
     })
 
     app.delete('/services/:id', async (req, res) => {
@@ -107,12 +156,13 @@ async function run() {
   res.send(result);
 });
 
-    app.delete('/booking/:id', async (req, res) => {
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) };
-  const result = await bookingCollection.deleteOne(query);
-  res.send(result);
-});
+//     app.delete('/booking/:id', async (req, res) => {
+//   const id = req.params.id;
+//   const query = { _id: new ObjectId(id) };
+//   const result = await bookingCollection.deleteOne(query);
+//   res.send(result);
+// });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
