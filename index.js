@@ -2,6 +2,7 @@ const express=require('express');
 const cors=require('cors')
 require('dotenv').config();
 const app=express()
+const jwt=require('jsonwebtoken')
 const port=process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -85,8 +86,7 @@ async function run() {
   res.send(result);
 });
 
-
-      app.get('/booking', async (req, res) => {
+     app.get('/booking', async (req, res) => {
         const email=req.query.email;
           const query={
         userEmail:email
@@ -105,37 +105,11 @@ async function run() {
           res.send(result);
       });
 
-    //      app.get('/booking/service/:job_id',async(req,res)=>{
-    //   const job_id=req.params.job_id;
-    //   const query={jobId:job_id}
-    //   const result=await bookingCollection.find(query).toArray()
-    //   res.send(result)
-    // })
-
-    //   app.get('/booking/services/:id',async(req,res)=>{
-    //   const id=req.params.id;
-    //   const query={serviceId:id}
-    //   const result=await bookingCollection.find(query).toArray()
-    //   res.send(result)
-    // })
-
       app.post('/booking',async(req,res)=>{
         const booking=req.body;
         const result=await bookingCollection.insertOne(booking);
         res.send(result);
     })
-
-//     app.patch('/booking/:id', async (req, res) => {
-//   const id = req.params.id;
-//   const { serviceStatus } = req.body;
-
-//   const result = await bookingCollection.updateOne(
-//     { _id: new ObjectId(id) },
-//     { $set: { serviceStatus } }
-//   );
-
-//   res.send(result);
-// });
 
  app.patch('/booking/:id',async(req,res)=>{
       const id=req.params.id;
@@ -156,12 +130,6 @@ async function run() {
   res.send(result);
 });
 
-//     app.delete('/booking/:id', async (req, res) => {
-//   const id = req.params.id;
-//   const query = { _id: new ObjectId(id) };
-//   const result = await bookingCollection.deleteOne(query);
-//   res.send(result);
-// });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
