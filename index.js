@@ -3,7 +3,7 @@ const cors=require('cors')
 require('dotenv').config();
 const app=express()
 const jwt=require('jsonwebtoken')
-const port=process.env.PORT || 3000;
+const port=process.env.PORT || 3001;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
@@ -74,17 +74,55 @@ async function run() {
         res.send(result)
     })
 
-    app.put('/services/:id', async (req, res) => {
-  const id = req.params.id;
-  const updatedService = req.body;
+//     app.put('/services/:id', async (req, res) => {
+//   const id = req.params.id;
+//   const updatedService = req.body;
 
-  const result = await serviceCollection.updateOne(
-    { _id: new ObjectId(id) },
-    { $set: updatedService }
-  );
+//   const result = await serviceCollection.updateOne(
+//     { _id: new ObjectId(id) },
+//     { $set: updatedService }
+//   );
 
-  res.send(result);
+//   res.send(result);
+// });
+
+app.put('/services/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = req.body;
+
+    // Map frontend field names to match your DB structure
+    const updatedService = {
+      serviceName: data.serviceName,
+      serviceImage: data.imageUrl,
+      servicePrice: data.price,
+      serviceArea: data.area,
+      serviceDescription: data.description,
+      providerImage: data.ProviderURL,
+      providerName: data.ProviderName,
+      providerEmail: data.ProviderEmail
+    };
+
+    const result = await serviceCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedService }
+    );
+
+    console.log("Updated:", result);
+
+    if (result.modifiedCount > 0) {
+      res.json({ success: true, message: "Service updated successfully" });
+    } else {
+      res.status(404).json({ success: false, message: "No changes made or service not found" });
+    }
+
+  } catch (error) {
+    console.error("Error updating service:", error);
+    res.status(500).json({ success: false, message: "Internal server error", error });
+  }
 });
+
+
 
      app.get('/booking', async (req, res) => {
         const email=req.query.email;
